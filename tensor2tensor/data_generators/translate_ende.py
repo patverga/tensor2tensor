@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import os
 import tarfile
+from shutil import copyfile
 
 # Dependency imports
 
@@ -146,6 +147,67 @@ class TranslateEndeWmt8k(translate.TranslateProblem):
   @property
   def target_space_id(self):
     return problem.SpaceID.DE_TOK
+
+
+
+
+
+
+
+@registry.register_problem
+class TranslateUschemaFb15k(translate.TranslateProblem):
+  """Problem spec for WMT En-De translation."""
+
+  @property
+  def targeted_vocab_size(self):
+    return 2**15  # 8192
+
+  @property
+  def vocab_name(self):
+    return 'vocab.uschema_fb15k_all'
+
+  def generator(self, data_dir, tmp_dir, train):
+    root_dir = '/iesl/data/clueweb_2016_full/fb15k_subset/kb/tmp'
+    tag = "train" if train else "dev"
+    source_path = '%s/%s' % (root_dir, tag)
+
+    vocab_file = '/home/pat/canvas/workspace_repos/tensor2tensor/t2t_data/uschema/vocab.uschema_fb15k_all.%d' % self.targeted_vocab_size
+    symbolizer_vocab = text_encoder.SubwordTextEncoder(vocab_file)
+
+    return translate.token_generator(source_path + ".lang1", source_path + ".lang2",
+                                     symbolizer_vocab, EOS)
+
+
+  # def generator(self, data_dir, tmp_dir, train):
+  #   tag = "train" if train else "dev"
+  #   root_dir = '/iesl/data/clueweb_2016_full/fb15k_subset/kb/tmp'
+  #   source_filename = '%s.tsv' % tag
+  #   source_path = '%s/%s' % (root_dir, source_filename)
+  #   tmp_fname = os.path.join(tmp_dir, source_filename)
+  #   if not os.path.isfile(tmp_fname):
+  #       copyfile(source_path, tmp_fname)
+  #
+  #   source_vocab = generator_utils.get_or_generate_tabbed_vocab(data_dir, tmp_dir, 'train.tsv',
+  #                                                               index=0,
+  #                                                               vocab_filename=self.vocab_name,
+  #                                                               vocab_size=self.targeted_vocab_size)
+  #   target_vocab = generator_utils.get_or_generate_tabbed_vocab(data_dir, tmp_dir, 'train.tsv',
+  #                                                               index=1,
+  #                                                               vocab_filename=self.vocab_name,
+  #                                                               vocab_size=self.targeted_vocab_size)
+  #   print('Tabbed Generator from %s' % source_path)
+  #   return translate.tabbed_generator(source_path, source_vocab, target_vocab)
+
+
+  @property
+  def input_space_id(self):
+    return problem.SpaceID.EN_TOK
+
+  @property
+  def target_space_id(self):
+    return problem.SpaceID.DE_TOK
+
+
 
 
 @registry.register_problem
