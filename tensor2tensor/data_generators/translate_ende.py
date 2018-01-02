@@ -160,7 +160,8 @@ class TranslateUschemaFb15k(translate.TranslateProblem):
 
   @property
   def targeted_vocab_size(self):
-    return 2**15  # 8192
+    return 90389
+    # return 2**15  # 8192
 
   @property
   def vocab_name(self):
@@ -171,8 +172,8 @@ class TranslateUschemaFb15k(translate.TranslateProblem):
     tag = "train" if train else "dev"
     source_path = '%s/%s' % (root_dir, tag)
 
-    vocab_file = '/home/pat/canvas/workspace_repos/tensor2tensor/t2t_data/uschema/vocab.uschema_fb15k_all.%d' % self.targeted_vocab_size
-    symbolizer_vocab = text_encoder.SubwordTextEncoder(vocab_file)
+    vocab_file = '%s/vocab.uschema_fb15k_all.%d' % (root_dir, self.targeted_vocab_size)
+    symbolizer_vocab = text_encoder.TokenTextEncoder(vocab_file, replace_oov='<UNK>')
 
     return translate.token_generator(source_path + ".lang1", source_path + ".lang2",
                                      symbolizer_vocab, EOS)
@@ -206,6 +207,10 @@ class TranslateUschemaFb15k(translate.TranslateProblem):
   @property
   def target_space_id(self):
     return problem.SpaceID.DE_TOK
+
+  @property
+  def use_subword_tokenizer(self):
+    return False
 
 
 
